@@ -1,6 +1,6 @@
 {
 	"name": "simple-folder-icon",
-	"version": "2.0.1",
+	"version": "2.0.2",
 	"description": "Automatically add an icon before the name of the configured folders in the file explorer.",
 	"main": "main.js",
 	"type": "module",
