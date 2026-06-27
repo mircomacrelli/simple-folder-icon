@@ -1,0 +1,9 @@
+.folder-icon {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 4px;
+}
+.folder-icon svg {
+    width: 16px;
+    height: 16px;
+}
