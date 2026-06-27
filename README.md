@@ -1,4 +1,4 @@
-# Folder Icon
+# Simple Folder Icon
 
 Automatically add an icon before the name of the configured folders in the file explorer.
 
