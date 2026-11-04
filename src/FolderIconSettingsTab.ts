@@ -25,25 +25,25 @@ export class FolderIconSettingsTab extends PluginSettingTab {
                 type: 'list',
                 heading: 'Folders',
                 emptyState: 'No folders configured',
-                items: this.plugin.settings.icons.map((item: FolderConfiguration) => ({
+                items: this.plugin.settings.icons.map((item: FolderConfiguration): {name: string, searchable: boolean} => ({
                     name: `${item.folderPath} → ${item.iconPath}`,
                     searchable: true
                 })),
-                onDelete: async (index: number): Promise<void> => {
+                onDelete: (index: number): void => {
                     this.plugin.settings.icons.splice(index, 1);
-                    await this.saveAndUpdate();
+                    this.saveAndUpdate().catch(console.error);
                 },
-                onReorder: async (from: number, to: number): Promise<void> => {
+                onReorder: (from: number, to: number): void => {
                     const [item] = this.plugin.settings.icons.splice(from, 1);
                     if (item) {
                         this.plugin.settings.icons.splice(to,  0, item);
-                        await this.plugin.saveSettings();
+                        this.plugin.saveSettings().catch(console.error);
                     }
                 },
                 addItem: {
                     name: 'Add folder',
-                    action: () => {
-                        new AddEditFolderIconModal(this.app, async (folderPath: string, iconPath: string) => {
+                    action: (): void => {
+                        new AddEditFolderIconModal(this.app, async (folderPath: string, iconPath: string): Promise<void> => {
                             this.plugin.settings.icons.push({
                                 folderPath: folderPath,
                                 iconPath: iconPath
