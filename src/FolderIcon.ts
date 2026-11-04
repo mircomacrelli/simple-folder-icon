@@ -1,11 +1,11 @@
 import {Plugin, TFile} from 'obsidian';
-import {DEFAULT_SETTINGS, STYLE_EL_ID} from "./constants";
+import {DEFAULT_SETTINGS} from "./constants";
 import {FolderIconSettings} from "./FolderIconSettings";
 import {FolderIconSettingsTab} from "./FolderIconSettingsTab";
 
 
 export default class FolderIcon extends Plugin {
-    private styleEl: HTMLElement | null = null;
+    private styleSheet: CSSStyleSheet | null = null;
 
     settings: FolderIconSettings = DEFAULT_SETTINGS;
 
@@ -19,9 +19,12 @@ export default class FolderIcon extends Plugin {
             await this.updateStyle();
         });
     }
+
     onunload(): void {
-        if (this.styleEl) {
-            this.styleEl.remove();
+        if (this.styleSheet) {
+            activeDocument.adoptedStyleSheets = activeDocument.adoptedStyleSheets.filter(
+                (sheet: CSSStyleSheet): boolean => sheet !== this.styleSheet
+            );
         }
     }
 
@@ -34,14 +37,14 @@ export default class FolderIcon extends Plugin {
     }
 
     private createStyleEl(): void {
-        if (!this.styleEl) {
-            // eslint-disable-next-line obsidianmd/no-forbidden-elements
-            this.styleEl = activeDocument.head.createEl('style', {attr: {id: STYLE_EL_ID}});
+        if (!this.styleSheet) {
+            this.styleSheet = new CSSStyleSheet();
+            activeDocument.adoptedStyleSheets = [...activeDocument.adoptedStyleSheets, this.styleSheet];
         }
     }
 
     async updateStyle(): Promise<void> {
-        if (this.styleEl) {
+        if (this.styleSheet) {
             const iconsMap: Map<string, string> = new Map<string, string>();
             for (const setting of this.settings.icons) {
                 const file: TFile | null = this.app.metadataCache.getFirstLinkpathDest(setting.iconPath, '');
@@ -66,7 +69,7 @@ export default class FolderIcon extends Plugin {
     mask-size: contain;
 }`);
             }
-            this.styleEl.textContent = cssRules.join('\n');
+            this.styleSheet.replaceSync(cssRules.join('\n'));
         }
     }
 }
