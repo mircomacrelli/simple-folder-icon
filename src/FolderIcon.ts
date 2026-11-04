@@ -1,14 +1,11 @@
-import {Plugin, TAbstractFile, TFile, TFolder, WorkspaceLeaf} from 'obsidian';
-import {FileExplorerView} from "./FileExplorerView";
-import {DEFAULT_SETTINGS, ICON_CONTAINER} from "./constants";
+import {Plugin, TFile} from 'obsidian';
+import {DEFAULT_SETTINGS, STYLE_EL_ID} from "./constants";
 import {FolderIconSettings} from "./FolderIconSettings";
-import {FolderConfiguration} from "./FolderConfiguration";
 import {FolderIconSettingsTab} from "./FolderIconSettingsTab";
-import {FileExplorerItem} from './FileExplorerItem';
 
 
 export default class FolderIcon extends Plugin {
-    private folderIcons: Map<string, HTMLElement> = new Map();
+    private styleEl: HTMLElement | null = null;
 
     settings: FolderIconSettings = DEFAULT_SETTINGS;
 
@@ -18,14 +15,14 @@ export default class FolderIcon extends Plugin {
         this.addSettingTab(new FolderIconSettingsTab(this.app, this));
 
         this.app.workspace.onLayoutReady(async (): Promise<void> => {
-            await this.loadAllIcons();
-            this.addFolderIcons();
+            this.createStyleEl();
+            await this.updateStyle();
         });
-
-        this.app.workspace.on('active-leaf-change', (): void => {
-            this.removeFolderIcons();
-            this.addFolderIcons();
-        });
+    }
+    onunload(): void {
+        if (this.styleEl) {
+            this.styleEl.remove();
+        }
     }
 
     private async loadSettings(): Promise<void> {
@@ -36,76 +33,40 @@ export default class FolderIcon extends Plugin {
         await this.saveData(this.settings);
     }
 
-    async updateAllIcons(): Promise<void> {
-        this.unloadAllIcons();
-        await this.loadAllIcons();
-        this.removeFolderIcons();
-        this.addFolderIcons();
-    }
-
-    private unloadAllIcons(): void {
-        this.folderIcons.clear();
-    }
-
-    private async loadAllIcons(): Promise<void> {
-        const promises: Promise<void>[] =
-            this.settings.icons.map((setting: FolderConfiguration): Promise<void> => this.loadIcon(setting));
-        await Promise.all(promises);
-    }
-
-    private async loadIcon(config: FolderConfiguration): Promise<void> {
-        const file: TFile | null = this.app.metadataCache.getFirstLinkpathDest(config.iconPath, '');
-        if (file) {
-            const content: string = await this.app.vault.read(file);
-            const doc: Document = new DOMParser().parseFromString(content,'text/xml');
-            const element = doc.firstElementChild as HTMLElement;
-            if (element && element.tagName === 'svg') {
-                this.folderIcons.set(config.folderPath, element);
-            }
+    private createStyleEl(): void {
+        if (!this.styleEl) {
+            // eslint-disable-next-line obsidianmd/no-forbidden-elements
+            this.styleEl = activeDocument.head.createEl('style', {attr: {id: STYLE_EL_ID}});
         }
     }
 
-    private addFolderIcons(): void {
-        if (this.folderIcons.size > 0) {
-            const views: FileExplorerView[] = this.getViews();
-            if (views.length > 0) {
-                for (const view of views) {
-                    for (const [path, item] of Object.entries(view.fileItems)) {
-                        const svg: HTMLElement | undefined = this.folderIcons.get(path);
-                        if (svg) {
-                            const file: TAbstractFile | null = this.app.vault.getAbstractFileByPath(path);
-                            if (file instanceof TFolder) {
-                                const container: HTMLElement = item.selfEl ?? item.el;
-                                if (container) {
-                                    const child: Element | null = container.firstElementChild;
-                                    if (child && !child.classList.contains(ICON_CONTAINER)) {
-                                        const span: HTMLElement = createSpan({cls: ICON_CONTAINER});
-                                        span.append(svg);
-                                        container.prepend(span);
-                                    }
-                                }
-                            }
-                        }
-                    }
+    async updateStyle(): Promise<void> {
+        if (this.styleEl) {
+            const iconsMap: Map<string, string> = new Map<string, string>();
+            for (const setting of this.settings.icons) {
+                const file: TFile | null = this.app.metadataCache.getFirstLinkpathDest(setting.iconPath, '');
+                if (file) {
+                    iconsMap.set(setting.folderPath, this.app.vault.getResourcePath(file));
                 }
             }
+            const cssRules: string[] = [];
+            for (const [folder, icon] of iconsMap) {
+                cssRules.push(`
+.nav-folder-title[data-path='${folder}'] .nav-folder-title-content::before {
+    content: '';
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    vertical-align: top;
+    background-color: currentColor;
+    mask-image: url('${icon}');
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+}`);
+            }
+            this.styleEl.textContent = cssRules.join('\n');
         }
-    }
-
-    private removeFolderIcons(): void {
-        for (const view of this.getViews()) {
-            view.containerEl.findAll(`.${ICON_CONTAINER}`).forEach((span: HTMLElement): void => span.remove());
-        }
-    }
-
-    private getViews(): FileExplorerView[] {
-        return this.app.workspace.getLeavesOfType('file-explorer')
-                   .map((leaf: WorkspaceLeaf): FileExplorerView => leaf.view as FileExplorerView)
-                   .filter((view: FileExplorerView): Record<string, FileExplorerItem> => view && view.fileItems);
-    }
-
-    onunload(): void {
-        this.removeFolderIcons();
-        this.folderIcons.clear();
     }
 }

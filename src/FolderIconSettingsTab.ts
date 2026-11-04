@@ -16,7 +16,7 @@ export class FolderIconSettingsTab extends PluginSettingTab {
     private async saveAndUpdate(): Promise<void> {
         this.update();
         await this.plugin.saveSettings();
-        await this.plugin.updateAllIcons();
+        await this.plugin.updateStyle();
     }
 
     getSettingDefinitions(): SettingDefinitionItem[] {
