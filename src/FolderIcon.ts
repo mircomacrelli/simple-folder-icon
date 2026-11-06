@@ -1,4 +1,4 @@
-import {Plugin, TFile} from 'obsidian';
+import {normalizePath, Plugin, TAbstractFile, TFile, TFolder} from 'obsidian';
 import {DEFAULT_SETTINGS} from "./constants";
 import {FolderIconSettings} from "./FolderIconSettings";
 import {FolderIconSettingsTab} from "./FolderIconSettingsTab";
@@ -47,8 +47,10 @@ export default class FolderIcon extends Plugin {
         if (this.styleSheet) {
             const iconsMap: Map<string, string> = new Map<string, string>();
             for (const setting of this.settings.icons) {
+                const folder: TAbstractFile | null = this.app.vault.getAbstractFileByPath(normalizePath(setting.folderPath));
                 const file: TFile | null = this.app.metadataCache.getFirstLinkpathDest(setting.iconPath, '');
-                if (file) {
+                if (folder && folder instanceof TFolder &&
+                    file && file.extension === 'svg') {
                     iconsMap.set(setting.folderPath, this.app.vault.getResourcePath(file));
                 }
             }
