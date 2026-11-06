@@ -55,7 +55,7 @@ export default class FolderIcon extends Plugin {
             const cssRules: string[] = [];
             for (const [folder, icon] of iconsMap) {
                 cssRules.push(`
-.nav-folder-title[data-path='${folder}'] .nav-folder-title-content::before {
+.nav-folder-title[data-path='${CSS.escape(folder)}'] .nav-folder-title-content::before {
     content: '';
     display: inline-block;
     width: 16px;
@@ -63,7 +63,7 @@ export default class FolderIcon extends Plugin {
     margin-right: 4px;
     vertical-align: top;
     background-color: currentColor;
-    mask-image: url('${icon}');
+    mask-image: url('${CSS.escape(icon)}');
     mask-repeat: no-repeat;
     mask-position: center;
     mask-size: contain;
