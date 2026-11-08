@@ -1,4 +1,4 @@
-import {App, PluginSettingTab, SettingDefinitionItem} from 'obsidian';
+import {App, PluginSettingTab, SettingDefinitionAction, SettingDefinitionItem} from 'obsidian';
 import FolderIcon from "./FolderIcon";
 import {FolderConfiguration} from './FolderConfiguration';
 import {AddEditFolderIconModal} from './AddEditFolderIconModal';
@@ -19,14 +19,32 @@ export class FolderIconSettingsTab extends PluginSettingTab {
         await this.plugin.updateStyle();
     }
 
+    private openModal(idx?: number) {
+        const selected: FolderConfiguration | undefined =
+            idx === undefined ? undefined : this.plugin.settings.icons[idx];
+        new AddEditFolderIconModal(this.app, this.plugin.settings.icons, selected, async (folderPath: string, iconPath: string): Promise<void> => {
+            if (selected) {
+                selected.folderPath = folderPath;
+                selected.iconPath = iconPath;
+            } else {
+                this.plugin.settings.icons.push({
+                    folderPath: folderPath,
+                    iconPath: iconPath
+                });
+            }
+             await this.saveAndUpdate();
+        }).open();
+    }
+
     getSettingDefinitions(): SettingDefinitionItem[] {
         return [
             {
                 type: 'list',
                 heading: 'Folders',
                 emptyState: 'No folders configured',
-                items: this.plugin.settings.icons.map((item: FolderConfiguration): {name: string, searchable: boolean} => ({
+                items: this.plugin.settings.icons.map((item: FolderConfiguration, index: number): SettingDefinitionAction => ({
                     name: `${item.folderPath} → ${item.iconPath}`,
+                    action: (): void => this.openModal(index),
                     searchable: true
                 })),
                 onDelete: (index: number): void => {
@@ -42,15 +60,7 @@ export class FolderIconSettingsTab extends PluginSettingTab {
                 },
                 addItem: {
                     name: 'Add folder',
-                    action: (): void => {
-                        new AddEditFolderIconModal(this.app, async (folderPath: string, iconPath: string): Promise<void> => {
-                            this.plugin.settings.icons.push({
-                                folderPath: folderPath,
-                                iconPath: iconPath
-                            });
-                            await this.saveAndUpdate();
-                        }).open();
-                    }
+                    action: (): void => this.openModal()
                 }
             }
         ];

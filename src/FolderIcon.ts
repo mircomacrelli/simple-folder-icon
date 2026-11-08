@@ -50,7 +50,7 @@ export default class FolderIcon extends Plugin {
                 const folder: TAbstractFile | null = this.app.vault.getAbstractFileByPath(normalizePath(setting.folderPath));
                 const file: TFile | null = this.app.metadataCache.getFirstLinkpathDest(setting.iconPath, '');
                 if (folder && folder instanceof TFolder &&
-                    file && file.extension === 'svg') {
+                    file && file.extension.toLowerCase() === 'svg') {
                     iconsMap.set(setting.folderPath, this.app.vault.getResourcePath(file));
                 }
             }

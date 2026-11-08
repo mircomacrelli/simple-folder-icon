@@ -1,1 +1,9 @@
-/* intentionally left blank */
+.setting-item-control input.sfi-input-error,
+.setting-item-control input.sfi-input-error:focus {
+    border-color: var(--text-error);
+}
+
+.setting-item-control input.sfi-input-error:focus {
+    /* TODO: rendi la shadow piu chiara */
+    box-shadow: 0 0 0 var(--input-border-width-focus) var(--text-error);
+}
