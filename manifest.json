@@ -1,7 +1,7 @@
 {
 	"id": "simple-folder-icon",
 	"name": "Simple Folder Icon",
-	"version": "3.1.0",
+	"version": "3.2.0",
 	"minAppVersion": "1.13.0",
 	"description": "Automatically add an icon before the name of the configured folders in the file explorer.",
 	"author": "Mirco Macrelli",
