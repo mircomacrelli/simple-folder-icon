@@ -10,8 +10,9 @@ export class SuggestSvg extends AbstractInputSuggest<TFile> {
     }
 
     protected getSuggestions(query: string): TFile[] | Promise<TFile[]> {
+        const lowerCaseQuery: string = query.toLowerCase();
         return this.allSvg.filter((file: TFile): boolean =>
-            file.path.toLowerCase().contains(query.toLowerCase()));
+            file.path.toLowerCase().contains(lowerCaseQuery));
     }
 
     renderSuggestion(value: TFile, el: HTMLElement): void {

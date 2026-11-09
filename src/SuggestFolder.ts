@@ -9,8 +9,9 @@ export class SuggestFolder extends AbstractInputSuggest<TFolder> {
     }
 
     protected getSuggestions(query: string): TFolder[] | Promise<TFolder[]> {
+        const lowerCaseQuery: string = query.toLowerCase();
         return this.allFolders.filter((folder: TFolder): boolean =>
-            folder.path.toLowerCase().contains(query.toLowerCase()));
+            folder.path.toLowerCase().contains(lowerCaseQuery));
     }
 
     renderSuggestion(value: TFolder, el: HTMLElement): void {
