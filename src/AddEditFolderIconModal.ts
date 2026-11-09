@@ -3,6 +3,7 @@ import {
     App,
     ButtonComponent,
     Modal,
+    normalizePath,
     Notice,
     Setting, TAbstractFile,
     TextComponent,
@@ -77,7 +78,8 @@ export class AddEditFolderIconModal extends Modal {
                           let duplicateFolder: boolean = false;
                           let unsupportedExtension: boolean = false;
 
-                          const folderPath: string = folderInput.getValue();
+                          const rawFolderPath: string = folderInput.getValue().trim();
+                          const folderPath: string = rawFolderPath === '' ? '' : normalizePath(rawFolderPath);
                           if (folderPath === '') {
                               folderInput.inputEl.addClass(this.errorClass);
                               emptyFields.push('Folder');
