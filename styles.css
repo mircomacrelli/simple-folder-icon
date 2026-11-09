@@ -4,6 +4,5 @@
 }
 
 .setting-item-control input.sfi-input-error:focus {
-    /* TODO: rendi la shadow piu chiara */
-    box-shadow: 0 0 0 var(--input-border-width-focus) var(--text-error);
+    box-shadow: 0 0 0 var(--input-border-width-focus) oklch(from var(--text-error) clamp(0, calc(l * 1.8), 1) c h);
 }
