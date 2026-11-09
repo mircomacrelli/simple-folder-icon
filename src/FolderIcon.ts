@@ -48,9 +48,9 @@ export default class FolderIcon extends Plugin {
             const iconsMap: Map<string, string> = new Map<string, string>();
             for (const setting of this.settings.icons) {
                 const folder: TAbstractFile | null = this.app.vault.getAbstractFileByPath(normalizePath(setting.folderPath));
-                const file: TFile | null = this.app.metadataCache.getFirstLinkpathDest(setting.iconPath, '');
+                const file: TAbstractFile | null = this.app.vault.getAbstractFileByPath(setting.iconPath);
                 if (folder && folder instanceof TFolder &&
-                    file && file.extension.toLowerCase() === 'svg') {
+                    file && file instanceof TFile && file.extension.toLowerCase() === 'svg') {
                     iconsMap.set(setting.folderPath, this.app.vault.getResourcePath(file));
                 }
             }
