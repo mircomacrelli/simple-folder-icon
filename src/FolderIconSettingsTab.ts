@@ -13,9 +13,13 @@ export class FolderIconSettingsTab extends PluginSettingTab {
         this.icon = 'image';
     }
 
-    private async saveAndUpdate(): Promise<void> {
+    private async saveSettings(): Promise<void> {
         this.update();
         await this.plugin.saveSettings();
+    }
+
+    private async saveAndUpdate(): Promise<void> {
+        await this.saveSettings()
         await this.plugin.updateStyle();
     }
 
@@ -32,7 +36,7 @@ export class FolderIconSettingsTab extends PluginSettingTab {
                     iconPath: iconPath
                 });
             }
-             await this.saveAndUpdate();
+            await this.saveAndUpdate();
         }).open();
     }
 
@@ -55,7 +59,7 @@ export class FolderIconSettingsTab extends PluginSettingTab {
                     const [item] = this.plugin.settings.icons.splice(from, 1);
                     if (item) {
                         this.plugin.settings.icons.splice(to,  0, item);
-                        this.plugin.saveSettings().catch(console.error);
+                        this.saveSettings().catch(console.error);
                     }
                 },
                 addItem: {
